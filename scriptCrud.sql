@@ -58,7 +58,7 @@ CREATE TABLE AVALIACAO (
     id_avaliacao INT AUTO_INCREMENT PRIMARY KEY,
     nota INT CHECK (nota >= 1 AND nota <= 5),
     comentario TEXT,
-    data_avaliacao DATETIME NOT NULL,
+    data_avaliacao DATE NOT NULL,
     id_avaliador INT,
     id_avaliado INT,
     id_parceria INT,
@@ -80,6 +80,18 @@ CREATE TABLE ANUNCIO (
 INSERT INTO ADMINISTRADOR (nome, email, usuario, senha, ativo)
 VALUES ('Giulio', 'giulio@gmail.com', 'giulio', '1234', 1);
 
+INSERT INTO USUARIO (nome_completo, email, senha, data_cadastro, tipo_perfil)
+VALUES ('Usuario Avaliador', 'avaliador@teste.com', '123', NOW(), 'Jardineiro');
 
+INSERT INTO USUARIO (nome_completo, email, senha, data_cadastro, tipo_perfil)
+VALUES ('Usuario Avaliado', 'avaliado@teste.com', '123', NOW(), 'Dono de Espaço');
 
+INSERT INTO ESPACO (titulo, endereco, cidade, estado, id_dono)
+VALUES ('Espaço Teste', 'Rua Falsa 123', 'Cidade Falsa', 'SP', 2);
 
+INSERT INTO PARCERIA (data_inicio, status, id_jardineiro, id_espaco)
+VALUES (CURDATE(), 'Ativa', 1, 1); 
+
+SELECT * FROM USUARIO ORDER BY id_usuario DESC;
+SELECT * FROM ESPACO ORDER BY id_espaco DESC;
+SELECT * FROM PARCERIA ORDER BY id_parceria DESC;
