@@ -18,7 +18,7 @@ async function novo(){
     fd.append("comentario", comentario);
     fd.append("data_avaliacao", data_avaliacao);
 
-    const retorno = await fetch("../../php/handlers/avaliacao/avaliacaoNova.php", {
+    const retorno = await fetch("../../php/handlers/avaliacao/avaliacaoNovo.php", {
         method: 'POST',
         body: fd
     });

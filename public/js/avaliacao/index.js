@@ -32,15 +32,19 @@ async function excluir(id) {
 }
 
 function preencherTabela(tabela) {
-    const tbody = document.getElementById('listaAvaliacoes');
+    const tbody = document.getElementById('listaAvaliacoes'); // Certifique-se que o ID no seu HTML é 'listaAvaliacoes'
     let tbodyHtml = '';
 
     if (tabela.length > 0) {
         for (const item of tabela) {
             const id = item.id_avaliacao;
-            const dataFormatada = item.data_avaliacao ?
-                new Date(item.data_avaliacao).toLocaleString('pt-BR') :
-                '';
+            
+            let dataFormatada = '';
+            if (item.data_avaliacao) {
+                const dataObj = new Date(item.data_avaliacao + 'T00:00:00Z'); 
+                const options = { year: 'numeric', month: '2-digit', day: '2-digit', timeZone: 'UTC' };
+                dataFormatada = dataObj.toLocaleDateString('pt-BR', options);
+            }
 
             tbodyHtml += `
                 <tr>
@@ -49,8 +53,7 @@ function preencherTabela(tabela) {
                     <td>${item.id_parceria}</td>
                     <td>${item.nota}</td>
                     <td>${item.comentario}</td>
-                    <td>${dataFormatada}</td>
-                    <td class="text-center">
+                    <td>${dataFormatada}</td>  <td class="text-center">
                         <a class="btn btn-sm btn-outline-primary me-2" href="atualizarAvaliacao.html?id=${id}">Alterar</a>
                         <button class="btn btn-sm btn-outline-danger" onclick="excluir(${id})">Excluir</button>
                     </td>

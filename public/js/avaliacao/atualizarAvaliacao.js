@@ -33,10 +33,8 @@ async function buscar(id) {
         document.getElementById("nota").value = avaliacao.nota || "";
         document.getElementById("comentario").value = avaliacao.comentario || "";
 
-        if (avaliacao.data_avaliacao) {
-            // Formata a data do banco 
-            const dataFormatada = avaliacao.data_avaliacao.slice(0, 16).replace(' ', 'T');
-            document.getElementById("data_avaliacao").value = dataFormatada;
+    if (avaliacao.data_avaliacao) {
+            document.getElementById("data_avaliacao").value = avaliacao.data_avaliacao;
         }
     } else {
         alert("Avaliação não encontrada.");
