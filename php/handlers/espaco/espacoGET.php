@@ -1,5 +1,5 @@
 <?php
-// Não exibir erros para o cliente — logar no servidor
+// Não exibir erros para o cliente – logar no servidor
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
@@ -10,7 +10,7 @@ include_once('../../includes/conexao.php');
 
 // Padrão de retorno
 $retorno = [
-    'status'    => 'nok', // ok - nok
+    'status'    => 'nok',
     'mensagem'  => 'Erro desconhecido',
     'data'      => []
 ];
@@ -22,20 +22,21 @@ if(!isset($conexao) || $conexao === null){
     exit;
 }
 
-// Ler parâmetros com segurança
-$usuario = isset($_POST['usuario']) ? trim($_POST['usuario']) : '';
-$senha = isset($_POST['senha']) ? trim($_POST['senha']) : '';
-
-if(empty($usuario) || empty($senha)){
-    $retorno['mensagem'] = 'Parâmetros inválidos.';
-    echo json_encode($retorno);
-    exit;
-}
-
 try{
-    // Preparando e executando a consulta
-    $stmt = $conexao->prepare("SELECT * FROM ADMINISTRADOR WHERE usuario = ? AND senha = ?");
-    $stmt->bind_param("ss", $usuario, $senha);
+    // Verifica se foi passado um ID específico (para buscar um único espaço)
+    $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+    
+    if(!empty($id)){
+        // Buscar um espaço específico por ID
+        // Using your actual database column names
+        $stmt = $conexao->prepare("SELECT id_espaco, titulo as nome, descricao, endereco FROM espaco WHERE id_espaco = ?");
+        $stmt->bind_param("i", $id);
+    } else {
+        // Buscar todos os espaços
+        // Using alias 'nome' for 'titulo' so the JavaScript works without changes
+        $stmt = $conexao->prepare("SELECT id_espaco, titulo as nome, descricao, endereco FROM espaco ORDER BY id_espaco DESC");
+    }
+    
     $stmt->execute();
     $resultado = $stmt->get_result();
 
@@ -45,19 +46,12 @@ try{
             $tabela[] = $linha;
         }
 
-        // Iniciar sessão e guardar dados (se necessário)
-        if(session_status() !== PHP_SESSION_ACTIVE){
-            session_start();
-        }
-        // Guardar usando a chave ANGULAR do projeto (padronizado em validaSessao.php)
-        $_SESSION['ADMINISTRADOR'] = $tabela;
-
         $retorno = [
             'status'    => 'ok',
-            'mensagem'  => 'Sucesso, consulta efetuada.',
+            'mensagem'  => 'Consulta efetuada com sucesso.',
             'data'      => $tabela
         ];
-    }else{
+    } else {
         $retorno = [
             'status'    => 'nok',
             'mensagem'  => 'Não há registros',
@@ -73,9 +67,10 @@ try{
 
     echo json_encode($retorno);
 }catch(Throwable $e){
-    // Log detalhado no servidor para debugging e retornar mensagem genérica ao cliente
-    error_log('Login handler error: ' . $e->getMessage());
-    $retorno['mensagem'] = 'Erro na execução. Consulte o administrador.';
+    // Log detalhado no servidor para debugging
+    error_log('Espaco GET error: ' . $e->getMessage());
+    $retorno['mensagem'] = 'ERRO: ' . $e->getMessage();
     echo json_encode($retorno);
     exit;
 }
+?>
