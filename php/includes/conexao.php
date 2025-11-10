@@ -2,9 +2,9 @@
 // Variáveis de conexão com o Banco de Dados
 $servidor = "localhost";
 $usuario  = "root";
-$senha    = "1234";
+$senha    = "";
 $nome_banco = "Crud";
-$porta = 3307; // porta padrão
+$porta = 3306; // porta padrão
 
 // Criando conexão com tratamento de erro discreto (não dar echo direto ao cliente)
 $conexao = null;

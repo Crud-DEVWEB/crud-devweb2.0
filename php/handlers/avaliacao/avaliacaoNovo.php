@@ -1,46 +1,63 @@
 <?php
-    ini_set('display_errors', 1);
-    ini_set('display_startup_errors', 1);
-    error_reporting(E_ALL);
+    ini_set('display_errors', 0); // Keep errors off for user
+    error_reporting(E_ALL); // Log errors
+    header("Content-type:application/json;charset:utf-8");
 
     include_once('../../includes/conexao.php');
 
     $retorno = [
-        'status'    => '',
-        'mensagem'  => '',
+        'status'    => 'nok',
+        'mensagem'  => 'Erro desconhecido.',
         'data'      => []
     ];
+
+    if (!isset($conexao) || $conexao === null) {
+        $retorno['mensagem'] = 'Erro na conexão com o banco de dados.';
+        echo json_encode($retorno);
+        exit;
+    }
     
-    // Coleta simples dos campos vindos do front
-    $nota = (int) $_POST['nota'];
-    $comentario = $_POST['comentario'];
-    $data_avaliacao = $_POST['data_avaliacao']; // Espera formato 'YYYY-MM-DD HH:MM:SS'
-    $id_avaliador = (int) $_POST['id_avaliador'];
-    $id_avaliado = (int) $_POST['id_avaliado'];
-    $id_parceria = (int) $_POST['id_parceria'];
+    // FIXED: Safely get all POST data
+    $nota           = isset($_POST['nota']) ? (int)$_POST['nota'] : 0;
+    $comentario     = isset($_POST['comentario']) ? trim($_POST['comentario']) : '';
+    $data_avaliacao = isset($_POST['data_avaliacao']) ? trim($_POST['data_avaliacao']) : '';
+    $id_avaliador   = isset($_POST['id_avaliador']) ? (int)$_POST['id_avaliador'] : 0;
+    $id_avaliado    = isset($_POST['id_avaliado']) ? (int)$_POST['id_avaliado'] : 0;
+    
+    // FIXED: Handle optional fields. If empty, send NULL to the database.
+    $id_parceria    = (empty($_POST['id_parceria']) ? null : (int)$_POST['id_parceria']);
 
-    // Preparando para inserção no banco de dados
-    // Inserção direta no schema (tabela AVALIACAO)
-    $stmt = $conexao->prepare("INSERT INTO AVALIACAO (nota, comentario, data_avaliacao, id_avaliador, id_avaliado, id_parceria) VALUES (?,?,?,?,?,?)");
-    $stmt->bind_param("issiii", $nota, $comentario, $data_avaliacao, $id_avaliador, $id_avaliado, $id_parceria);
-    $stmt->execute();
-
-    if($stmt->affected_rows > 0){
-        $retorno = [
-            'status' => 'ok',
-            'mensagem' => 'registro inserido com sucesso',
-            'data' => []
-        ];
-    }else{
-        $retorno = [
-            'status' => 'nok',
-            'mensagem' => 'falha ao inserir o registro',
-            'data' => []
-        ];
+    // Validation
+    if (empty($nota) || empty($comentario) || empty($data_avaliacao) || empty($id_avaliador) || empty($id_avaliado)) {
+        $retorno['mensagem'] = 'Campos obrigatórios: Nota, Comentário, Data, ID Avaliador, ID Avaliado.';
+        echo json_encode($retorno);
+        exit;
     }
 
-    $stmt->close();
-    $conexao->close();
+    try {
+        $stmt = $conexao->prepare("INSERT INTO AVALIACAO (nota, comentario, data_avaliacao, id_avaliador, id_avaliado, id_parceria) VALUES (?,?,?,?,?,?)");
+        // Bind types: i(nota), s(comentario), s(data), i(id_avaliador), i(id_avaliado), i(id_parceria)
+        $stmt->bind_param("issiii", $nota, $comentario, $data_avaliacao, $id_avaliador, $id_avaliado, $id_parceria);
+        
+        if($stmt->execute()){
+            $retorno = [
+                'status' => 'ok',
+                'mensagem' => 'Registro inserido com sucesso!',
+                'data' => []
+            ];
+        } else {
+            // Give a specific error for debugging
+            $retorno['mensagem'] = 'Falha ao inserir o registro: ' . $stmt->error;
+        }
 
-    header("Content-type:application/json;charset:utf-8");
+        $stmt->close();
+        $conexao->close();
+
+    } catch (Throwable $e) {
+        // Catch potential crashes (like Foreign Key constraint)
+        $retorno['mensagem'] = "ERRO: " . $e->getMessage();
+        error_log("Erro em avaliacaoNovo.php: " . $e->getMessage());
+    }
+
     echo json_encode($retorno);
+?>

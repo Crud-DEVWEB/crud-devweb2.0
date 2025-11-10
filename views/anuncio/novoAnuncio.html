@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,6 @@
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 </head>
-
 <body class="d-flex flex-column min-vh-100 bg-light">
     <header>
         <nav class="navbar bg-dark navbar-expand-lg" data-bs-theme="dark">
@@ -30,28 +28,21 @@
         <div class="card shadow-sm" style="max-width: 700px; width: 100%;">
             <div class="card-body p-4">
                 <h2 class="card-title text-center mb-4">Criar Novo Anúncio</h2>
+                
                 <form id="formAnuncio">
-                    <!-- formulario padrão de input de texto -->
-                    <div class="mb-3">
-                        <label for="anunciante" class="form-label">Anunciante</label>
-                        <input type="text" class="form-control" id="anunciante" name="anunciante" required>
-                    </div>
                     <div class="mb-3">
                         <label for="titulo" class="form-label">Título do Anúncio</label>
                         <input type="text" class="form-control" id="titulo" name="titulo" required>
                     </div>
-                    <!-- formulario padrão de input de texto -->
                     <div class="mb-3">
                         <label for="descricao" class="form-label">Descrição</label>
                         <textarea class="form-control" id="descricao" name="descricao" rows="4" required></textarea>
                     </div>
                     <div class="row">
-                        <!-- formulario padrão de input de texto -->
                         <div class="col-md-6 mb-3">
                             <label for="preco" class="form-label">Preço (R$)</label>
                             <input type="number" class="form-control" id="preco" name="preco" step="0.01" required>
                         </div>
-                        <!-- formulario para escolher uma entre varias opções, fazendo aparecer uma lista "select" -->
                         <div class="col-md-6 mb-3">
                             <label for="categoria" class="form-label">Categoria</label>
                             <select class="form-select" id="categoria" name="categoria">
@@ -60,15 +51,10 @@
                             </select>
                         </div>
                     </div>
-                    <div class="mb-4">
-                        <!-- formulario padrão de input de texto -->
-                        <label for="localizacao" class="form-label">Localização (Cidade/Bairro)</label>
-                        <input type="text" class="form-control" id="localizacao" name="localizacao" required>
-                    </div>
-                    <!-- botão para enviar um click, função referenciada pelo id e pagina pelo href -->
+                    
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
                         <a href="index.html" class="btn btn-secondary">Cancelar</a>
-                        <button type="button" id="enviar" class="btn btn-dark">Criar Anúncio</button>
+                        <button type="submit" id="enviar" class="btn btn-dark">Criar Anúncio</button>
                     </div>
                 </form>
             </div>

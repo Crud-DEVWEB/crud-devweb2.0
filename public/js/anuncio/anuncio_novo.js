@@ -1,33 +1,31 @@
-document.getElementById("enviar").addEventListener("click", () => {
-    novo();
-});
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Find the form
+    const formAnuncio = document.getElementById("formAnuncio");
 
-async function novo(){
-    var anunciante    = document.getElementById("anunciante").value;
-    var titulo = document.getElementById("titulo").value;
-    var descricao   = document.getElementById("descricao").value;
-    var preco   = document.getElementById("preco").value;
-    var categoria   = document.getElementById("categoria").value;
-    var localizacao   = document.getElementById("localizacao").value;
+    // 2. Add a 'submit' listener
+    formAnuncio.addEventListener("submit", async (e) => {
+        e.preventDefault(); // Stop page reload
 
-    const fd = new FormData();
-    fd.append("anunciante", anunciante);
-    fd.append("titulo", titulo);
-    fd.append("descricao", descricao);
-    fd.append("preco", preco);
-    fd.append("categoria", categoria);
-    fd.append("localizacao", localizacao);
+        // 3. Use the AUTOMATIC method
+        const fd = new FormData(formAnuncio);
 
-        const retorno = await fetch("../../php/handlers/anuncio/anuncio_novo.php", {
-            method: 'POST',
-            body: fd
-        });
-        const resposta = await retorno.json();
+        // 4. Send to the Chef (PHP)
+        try {
+            const retorno = await fetch("../../php/handlers/anuncio/anuncio_novo.php", {
+                method: "POST",
+                body: fd,
+            });
+            const resposta = await retorno.json();
 
-        if(resposta.status == "ok"){
-            alert("SUCESSO: " + resposta.mensagem);
-            window.location.href = "index.html";
-        }else{
-            alert("ERRO: " + resposta.mensagem);
+            if (resposta.status == "ok") {
+                alert("SUCESSO: " + resposta.mensagem);
+                window.location.href = "index.html";
+            } else {
+                alert("ERRO: " + resposta.mensagem);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Ocorreu um erro ao enviar o formulário.");
         }
-}
+    });
+});

@@ -1,33 +1,34 @@
-document.getElementById("enviar").addEventListener("click", () => {
-    novo();
-});
+// REPLACED: Entire file with automatic FormData method
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Find the form
+    const formAvaliacao = document.getElementById("formAvaliacao");
 
-async function novo(){
-    var id_avaliador   = document.getElementById("id_avaliador").value;
-    var id_avaliado    = document.getElementById("id_avaliado").value;
-    var id_parceria    = document.getElementById("id_parceria").value;
-    var nota           = document.getElementById("nota").value;
-    var comentario     = document.getElementById("comentario").value;
-    var data_avaliacao = document.getElementById("data_avaliacao").value;
+    // 2. Add a 'submit' listener
+    formAvaliacao.addEventListener("submit", async (e) => {
+        // 3. Prevent the page from reloading
+        e.preventDefault();
 
-    const fd = new FormData();
-    fd.append("id_avaliador", id_avaliador);
-    fd.append("id_avaliado", id_avaliado);
-    fd.append("id_parceria", id_parceria);
-    fd.append("nota", nota);
-    fd.append("comentario", comentario);
-    fd.append("data_avaliacao", data_avaliacao);
+        // 4. Use the AUTOMATIC method
+        const fd = new FormData(formAvaliacao);
 
-    const retorno = await fetch("../../php/handlers/avaliacao/avaliacaoNovo.php", {
-        method: 'POST',
-        body: fd
+        // 5. Send to the Chef (PHP)
+        try {
+            const retorno = await fetch("../../php/handlers/avaliacao/avaliacaoNovo.php", {
+                method: "POST",
+                body: fd,
+            });
+
+            const resposta = await retorno.json();
+
+            if (resposta.status === "ok") {
+                alert("SUCESSO: " + resposta.mensagem);
+                window.location.href = "index.html"; // Go back to list
+            } else {
+                alert("ERRO: " + resposta.mensagem);
+            }
+        } catch (error) {
+            console.error("Fetch error:", error);
+            alert("Ocorreu um erro ao enviar o formulário: " + error.message);
+        }
     });
-    const resposta = await retorno.json();
-
-    if(resposta.status == "ok"){
-        alert("SUCESSO: " + resposta.mensagem);
-        window.location.href = "index.html";
-    }else{
-        alert("ERRO: " + resposta.mensagem);
-    }
-}
+});

@@ -50,7 +50,7 @@ try{
             session_start();
         }
         // Guardar usando a chave ANGULAR do projeto (padronizado em validaSessao.php)
-        $_SESSION['ADMINISTRADOR'] = $tabela;
+        $_SESSION['ADMINISTRADOR'] = $tabela[0];
 
         $retorno = [
             'status'    => 'ok',
