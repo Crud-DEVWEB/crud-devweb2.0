@@ -1,42 +1,57 @@
 <?php
-    include_once('../../includes/conexao.php');
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+header('Content-Type: application/json; charset=utf-8');
 
-    $retorno = [
-        'status'    => '',
-        'mensagem'  => '',
-        'data'      => []
-    ];
-    // Coleta simples dos campos vindos do front
-    $titulo = $_POST['titulo'];
-    $descricao = $_POST['descricao'];
-    $preco = floatval($_POST['preco']);
-    $categoria = $_POST['categoria'];
+include_once('../../includes/conexao.php');
 
-    // Mapear categoria para tipo conforme enum do banco
-    $tipo = ($categoria === 'venda_plantas') ? 'Venda de Semente' : 'Aluguel de Ferramenta';
+$retorno = [
+    'status'    => 'nok',
+    'mensagem'  => 'Erro desconhecido',
+    'data'      => []
+];
 
-    // Preparando para inserção no banco de dados
-    // Inserção direta no schema (tabela ANUNCIO)
+if (!isset($conexao) || $conexao === null) {
+    $retorno['mensagem'] = 'Erro na conexão com o banco de dados.';
+    echo json_encode($retorno);
+    exit;
+}
+
+$titulo = isset($_POST['titulo']) ? trim($_POST['titulo']) : '';
+$descricao = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
+$preco = isset($_POST['preco']) ? (float)$_POST['preco'] : 0.0;
+$categoria = isset($_POST['categoria']) ? $_POST['categoria'] : '';
+
+if (empty($titulo) || empty($descricao) || empty($categoria)) {
+    $retorno['mensagem'] = 'Campos obrigatórios: Título, Descrição, Categoria.';
+    echo json_encode($retorno);
+    exit;
+}
+
+
+$tipo = ($categoria === 'venda_plantas') ? 'Venda de Semente' : 'Aluguel de Ferramenta';
+
+try {
     $stmt = $conexao->prepare("INSERT INTO ANUNCIO (titulo, descricao, tipo, preco) VALUES (?,?,?,?)");
-    $stmt->bind_param("sssd", $titulo, $descricao, $tipo, $preco);
-    $stmt->execute();
 
-    if($stmt->affected_rows > 0){
+    $stmt->bind_param("sssd", $titulo, $descricao, $tipo, $preco);
+    
+    if($stmt->execute()){
         $retorno = [
             'status' => 'ok',
-            'mensagem' => 'registro inserido com sucesso',
-            'data' => []
+            'mensagem' => 'Registro inserido com sucesso!',
+            'data' => ['id_anuncio' => $conexao->insert_id]
         ];
-    }else{
-        $retorno = [
-            'status' => 'nok',
-            'mensagem' => 'falha ao inserir o registro',
-            'data' => []
-        ];
+    } else {
+        $retorno['mensagem'] = 'Falha ao inserir o registro: ' . $stmt->error;
     }
-
     $stmt->close();
-    $conexao->close();
 
-    header("Content-type:application/json;charset:utf-8");
-    echo json_encode($retorno);
+} catch (Throwable $e) {
+    error_log("Erro em anuncio_novo.php: " . $e->getMessage());
+    $retorno['mensagem'] = "ERRO: " . $e->getMessage();
+}
+
+$conexao->close();
+echo json_encode($retorno);
+?>

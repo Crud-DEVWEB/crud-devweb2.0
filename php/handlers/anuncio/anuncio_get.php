@@ -1,18 +1,32 @@
 <?php
-    include_once('../../includes/conexao.php');
-    $retorno = [
-        'status'    => '',
-        'mensagem'  => '',
-        'data'      => []
-    ];
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+header('Content-Type: application/json; charset=utf-8');
 
-    if(isset($_GET['id'])){
-        // Filtrar por ID específico (primária: id_anuncio)
-        $stmt = $conexao->prepare("SELECT id_anuncio, titulo, descricao, tipo, preco FROM ANUNCIO WHERE id_anuncio = ?");
-        $stmt->bind_param("i", $_GET['id']);
+include_once('../../includes/conexao.php');
+
+$retorno = [
+    'status'    => 'nok',
+    'mensagem'  => 'Erro desconhecido',
+    'data'      => []
+];
+
+if(!isset($conexao) || $conexao === null){
+    $retorno['mensagem'] = 'Erro na conexão com o banco de dados.';
+    echo json_encode($retorno);
+    exit;
+}
+
+try {
+    $id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+    
+    $sql_cols = "id_anuncio, titulo, descricao, tipo, preco";
+
+    if(!empty($id)){
+        $stmt = $conexao->prepare("SELECT $sql_cols FROM ANUNCIO WHERE id_anuncio = ?");
+        $stmt->bind_param("i", $id);
     }else{
-        // Listar todos
-        $stmt = $conexao->prepare("SELECT id_anuncio, titulo, descricao, tipo, preco FROM ANUNCIO");
+        $stmt = $conexao->prepare("SELECT $sql_cols FROM ANUNCIO ORDER BY id_anuncio DESC");
     }
 
     $stmt->execute();
@@ -25,19 +39,21 @@
         }
         $retorno = [
             'status'    => 'ok',
-            'mensagem'  => 'Sucesso, consulta efetuada.',
+            'mensagem'  => 'Consulta efetuada com sucesso.',
             'data'      => $tabela
         ];
     }else{
-        $retorno = [
-            'status'    => 'nok',
-            'mensagem'  => 'Não há registros',
-            'data'      => []
-        ];
+        $retorno['mensagem'] = 'Não há registros';
     }
 
     $stmt->close();
     $conexao->close();
-
-    header("Content-type:application/json;charset:utf-8");
     echo json_encode($retorno);
+
+} catch(Throwable $e){
+    error_log('Anuncio GET error: ' . $e->getMessage());
+    $retorno['mensagem'] = 'ERRO: ' . $e->getMessage();
+    echo json_encode($retorno);
+    exit;
+}
+?>

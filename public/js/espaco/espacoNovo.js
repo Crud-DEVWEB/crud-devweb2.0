@@ -4,15 +4,12 @@ document.addEventListener("DOMContentLoaded", () => {
     formEspaco.addEventListener("submit", async (e) => {
         e.preventDefault(); 
 
-        // 4. Usar método AUTOMATICO
         const fd = new FormData(formEspaco);
 
-        // 5. Manually handle the checkbox
         if (!fd.has("disponibilidade")) {
             fd.append("disponibilidade", "0");
         }
 
-        // 6. Envia ao PHP
         try {
             const retorno = await fetch("../../php/handlers/espaco/espacoNovo.php", {
                 method: "POST",

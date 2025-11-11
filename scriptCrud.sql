@@ -1,13 +1,3 @@
--- ----------------------------------------------------------------
--- PROJETO: Crud
--- DISCIPLINA: Desenvolvimento Web
--- PROFESSOR: Giulio
---
--- ARQUIVO SQL - CrudRA2
--- Alunos: Artur K, Eduardo F, João Victor R, Luiz D, Matthew M, Rafael S
--- ----------------------------------------------------------------
-
-
 CREATE DATABASE Crud;
 
 USE Crud;
@@ -74,7 +64,8 @@ CREATE TABLE ANUNCIO (
     tipo ENUM('Aluguel de Ferramenta', 'Venda de Semente') NOT NULL,
     preco DECIMAL(10, 2) NOT NULL,
     id_anunciante INT,
-    FOREIGN KEY (id_anunciante) REFERENCES USUARIO(id_usuario) ON DELETE SET NULL
+    localizacao VARCHAR(255) NOT NULL,
+    FOREIGN KEY (id_anunciante) REFERENCES USUARIO(id_usuario) ON DELETE SET NULL
 );
 
 INSERT INTO ADMINISTRADOR (nome, email, usuario, senha, ativo)

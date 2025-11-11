@@ -1,50 +1,70 @@
 <?php
-    include_once('../../includes/conexao.php');
+ini_set('display_errors', 0);
+error_reporting(E_ALL);
+header('Content-Type: application/json; charset=utf-8');
 
-    $retorno = [
-        'status'    => '',
-        'mensagem'  => '',
-        'data'      => []
-    ];
+include_once('../../includes/conexao.php');
 
-    if(isset($_GET['id'])){
-        // Campos vindos do front
-        $titulo     = $_POST['titulo'];
-        $descricao  = $_POST['descricao'];
-        $preco      = floatval($_POST['preco']);
-        $categoria  = $_POST['categoria'];
+$retorno = [
+    'status'    => 'nok',
+    'mensagem'  => 'Erro desconhecido',
+    'data'      => []
+];
 
-        // Mapear categoria -> tipo conforme enum no banco
-        $tipo = ($categoria === 'venda_plantas') ? 'Venda de Semente' : 'Aluguel de Ferramenta';
+if (!isset($conexao) || $conexao === null) {
+    $retorno['mensagem'] = 'Erro na conexão com o banco de dados.';
+    echo json_encode($retorno);
+    exit;
+}
 
-        // Atualização no banco de dados
-        $stmt = $conexao->prepare("UPDATE ANUNCIO SET titulo = ?, descricao = ?, tipo = ?, preco = ? WHERE id_anuncio = ?");
-        $stmt->bind_param("sssdi", $titulo, $descricao, $tipo, $preco, $_GET['id']);
-        $stmt->execute();
+$id = filter_input(INPUT_GET, 'id', FILTER_SANITIZE_NUMBER_INT);
+if(empty($id)){
+    $retorno['mensagem'] = 'ID do anúncio não informado.';
+    echo json_encode($retorno);
+    exit;
+}
 
+$titulo = isset($_POST['titulo']) ? trim($_POST['titulo']) : '';
+$descricao = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
+$preco = isset($_POST['preco']) ? (float)$_POST['preco'] : 0.0;
+$categoria = isset($_POST['categoria']) ? $_POST['categoria'] : '';
+
+if (empty($titulo) || empty($descricao) || empty($categoria)) {
+    $retorno['mensagem'] = 'Campos obrigatórios: Título, Descrição, Categoria.';
+    echo json_encode($retorno);
+    exit;
+}
+
+$tipo = ($categoria === 'venda_plantas') ? 'Venda de Semente' : 'Aluguel de Ferramenta';
+
+try {
+    $stmt = $conexao->prepare("UPDATE ANUNCIO SET titulo = ?, descricao = ?, tipo = ?, preco = ? WHERE id_anuncio = ?");
+    $stmt->bind_param("sssdi", $titulo, $descricao, $tipo, $preco, $id);
+    
+    if($stmt->execute()){
         if($stmt->affected_rows > 0){
             $retorno = [
                 'status'    => 'ok',
                 'mensagem'  => 'Registro alterado com sucesso.',
                 'data'      => []
             ];
-        }else{
+        } else {
             $retorno = [
                 'status'    => 'nok',
-                'mensagem'  => 'Não posso alterar um registro.',
+                'mensagem'  => 'Nenhuma alteração foi feita (dados iguais).',
                 'data'      => []
             ];
         }
-        $stmt->close();
     }else{
-        $retorno = [
-            'status'    => 'nok',
-            'mensagem'  => 'Não posso alterar um registro sem um ID informado.',
-            'data'      => []
-        ];
+        $retorno['mensagem'] = 'Falha ao alterar o registro: ' . $stmt->error;
     }
+    $stmt->close();
 
-    $conexao->close();
+} catch (Throwable $e) {
+    error_log("Erro em anuncio_alterar.php: " . $e->getMessage());
+    $retorno['mensagem'] = "ERRO: " . $e->getMessage();
+}
 
-    header("Content-type:application/json;charset:utf-8");
-    echo json_encode($retorno);
+$conexao->close();
+echo json_encode($retorno);
+?>

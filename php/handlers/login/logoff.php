@@ -4,8 +4,8 @@
     session_destroy();
     
     $retorno = [
-        'status'    => 'ok', // ok - nok
-        'mensagem'  => '', // mensagem que envio para o front
+        'status'    => 'ok',
+        'mensagem'  => '',
         'data'      => []
     ];
     

@@ -17,15 +17,14 @@ if (!isset($conexao) || $conexao === null) {
     exit;
 }
 
-$titulo = isset($_POST['nome']) ? trim($_POST['nome']) : ''; // Form sends 'nome'
+$titulo = isset($_POST['nome']) ? trim($_POST['nome']) : '';
 $descricao = isset($_POST['descricao']) ? trim($_POST['descricao']) : '';
 $endereco = isset($_POST['endereco']) ? trim($_POST['endereco']) : '';
 $cidade = isset($_POST['cidade']) ? trim($_POST['cidade']) : '';
 $estado = isset($_POST['estado']) ? trim($_POST['estado']) : '';
-$cep = isset($_POST['cep']) ? trim($_POST['cep']) : null; // CEP can be optional (NULL)
+$cep = isset($_POST['cep']) ? trim($_POST['cep']) : null;
 $disponibilidade = isset($_POST['disponibilidade']) ? (int)$_POST['disponibilidade'] : 0;
 
-// 2. Validation
 if (empty($titulo) || empty($endereco) || empty($cidade) || empty($estado)) {
     $retorno['mensagem'] = 'Campos obrigatórios: Nome, Endereço, Cidade, Estado.';
     echo json_encode($retorno);
@@ -33,16 +32,13 @@ if (empty($titulo) || empty($endereco) || empty($cidade) || empty($estado)) {
 }
 
 try {
-    // 3. Correct SQL query with 7 columns and 7 placeholders
     $stmt = $conexao->prepare(
         "INSERT INTO ESPACO (titulo, descricao, endereco, cidade, estado, cep, disponibilidade) 
          VALUES (?, ?, ?, ?, ?, ?, ?)"
     );
 
-    // 4. Correct 'bind_param' with 7 types and variables
-    // s = string, i = integer
     $stmt->bind_param(
-        "ssssssi", // 6 strings, 1 integer
+        "ssssssi",
         $titulo, $descricao, $endereco, $cidade, $estado, $cep, $disponibilidade
     );
 

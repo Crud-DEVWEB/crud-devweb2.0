@@ -1,15 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Find the form
     const formAnuncio = document.getElementById("formAnuncio");
 
-    // 2. Add a 'submit' listener
     formAnuncio.addEventListener("submit", async (e) => {
-        e.preventDefault(); // Stop page reload
+        e.preventDefault();
 
-        // 3. Use the AUTOMATIC method
         const fd = new FormData(formAnuncio);
 
-        // 4. Send to the Chef (PHP)
         try {
             const retorno = await fetch("../../php/handlers/anuncio/anuncio_novo.php", {
                 method: "POST",
