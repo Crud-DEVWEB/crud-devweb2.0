@@ -1,7 +1,8 @@
 <?php
+// Arquivo: php/includes/conexao_relatorio.php
 $servidor = "localhost";
-$usuario  = "root";
-$senha    = "240723";
+$usuario  = "user_relatorio"; // Usuário restrito criado no SQL
+$senha    = "senha_leitura_123";
 $nome_banco = "Crud";
 $porta = 3306;
 
@@ -11,6 +12,7 @@ try{
     $conexao = new mysqli($servidor, $usuario, $senha, $nome_banco, $porta);
     $conexao->set_charset('utf8mb4');
 }catch (Throwable $e){
-    error_log('DB connection error: ' . $e->getMessage());
+    error_log('Erro conexão relatorio: ' . $e->getMessage());
     $conexao = null;
 }
+?>
