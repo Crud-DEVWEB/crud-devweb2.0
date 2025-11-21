@@ -1,3 +1,4 @@
+DROP DATABASE IF EXISTS Crud;
 CREATE DATABASE Crud;
 
 USE Crud;
@@ -63,26 +64,39 @@ CREATE TABLE ANUNCIO (
     descricao TEXT,
     tipo ENUM('Aluguel de Ferramenta', 'Venda de Semente') NOT NULL,
     preco DECIMAL(10, 2) NOT NULL,
-    id_anunciante INT,
-    localizacao VARCHAR(255) NOT NULL,
-    FOREIGN KEY (id_anunciante) REFERENCES USUARIO(id_usuario) ON DELETE SET NULL
+    id_anunciante INT NULL REFERENCES USUARIO(id_usuario) ON DELETE SET NULL
 );
+
 
 INSERT INTO ADMINISTRADOR (nome, email, usuario, senha, ativo)
 VALUES ('Giulio', 'giulio@gmail.com', 'giulio', '1234', 1);
 
-INSERT INTO USUARIO (nome_completo, email, senha, data_cadastro, tipo_perfil)
-VALUES ('Usuario Avaliador', 'avaliador@teste.com', '123', NOW(), 'Jardineiro');
+-- FASE 3 
+-- Artur 
+-- 1. Cria o usuário de relatórios
+CREATE USER 'user_relatorio'@'localhost' IDENTIFIED BY 'senha_leitura_123';
 
-INSERT INTO USUARIO (nome_completo, email, senha, data_cadastro, tipo_perfil)
-VALUES ('Usuario Avaliado', 'avaliado@teste.com', '123', NOW(), 'Dono de Espaço');
+-- 2. Dá permissão APENAS de leitura (SELECT) nas tabelas
+GRANT SELECT ON Crud.USUARIO TO 'user_relatorio'@'localhost';
+GRANT SELECT ON Crud.ESPACO TO 'user_relatorio'@'localhost';
+GRANT SELECT ON Crud.PARCERIA TO 'user_relatorio'@'localhost';
+GRANT SELECT ON Crud.AVALIACAO TO 'user_relatorio'@'localhost';
+GRANT SELECT ON Crud.ANUNCIO TO 'user_relatorio'@'localhost';
 
-INSERT INTO ESPACO (titulo, endereco, cidade, estado, id_dono)
-VALUES ('Espaço Teste', 'Rua Falsa 123', 'Cidade Falsa', 'SP', 2);
+-- 3. Atualiza as permissões
+FLUSH PRIVILEGES;
 
-INSERT INTO PARCERIA (data_inicio, status, id_jardineiro, id_espaco)
-VALUES (CURDATE(), 'Ativa', 1, 1); 
+-- João
+START TRANSACTION;
 
-SELECT * FROM USUARIO ORDER BY id_usuario DESC;
-SELECT * FROM ESPACO ORDER BY id_espaco DESC;
-SELECT * FROM PARCERIA ORDER BY id_parceria DESC;
+-- 1. Insere a nova avaliação no sistema
+INSERT INTO AVALIACAO (nota, comentario, data_avaliacao, id_avaliador, id_avaliado, id_parceria) 
+VALUES (5, 'Ótimo serviço!', NOW(), 1, 2, 3);
+
+-- 2. Automaticamente encerra a parceria vinculada
+UPDATE PARCERIA 
+SET status = 'Ativa', data_fim = NOW()
+WHERE id_parceria = 3;
+
+COMMIT;
+
